@@ -1,0 +1,30 @@
+{
+  "name": "sprite-editor",
+  "version": "0.1",
+  "description": "Sprite Editor",
+  "author": "Bill Zhang",
+  "main": "main.js",
+  "hosts": {
+    "editor-framework": "^0.3.15"
+  },
+  "menus": {
+    "Test/Sprite Editor": {
+      "message": "sprite-editor:open",
+      "accelerator": "CmdOrCtrl+Shift+O"
+    }
+  },
+  "panels": {
+    "panel": {
+      "frame": "panel/sprite-editor.html",
+      "type": "dockable",
+      "title": "Sprite Editor",
+      "width": 500,
+      "min-width": 325,
+      "height": 500,
+      "min-height": 325,
+      "messages": [
+        "sprite-editor:open-sprite"
+      ]
+    }
+  }
+}

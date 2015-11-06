@@ -1,0 +1,15 @@
+<link rel="import" href="packages://ui-kit/widget/index.html">
+
+<dom-module id="sprite-editor">
+    <link rel="import" type="css" href="sprite-editor.css">
+    <template>
+        <editor-toolbar>
+            <editor-slider id="scaleSlider" input disabled type="int" class="flex-1 fley-1" value="{{scale}}" max="500" min="20"></editor-slider>
+        </editor-toolbar>
+        <div id="content" class="view"  on-mousewheel="onMouseWheel">
+            <canvas id="canvas" width=20 height=20></canvas>
+        </div>
+    </template>
+
+    <script type="text/javascript" src="sprite-editor.js"></script>
+</dom-module>
