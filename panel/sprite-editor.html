@@ -1,13 +1,34 @@
 <link rel="import" href="packages://ui-kit/widget/index.html">
+<script type="text/javascript" src="app://bower_components/svg.js/dist/svg.min.js"></script>
 
 <dom-module id="sprite-editor">
     <link rel="import" type="css" href="sprite-editor.css">
     <template>
         <editor-toolbar>
-            <editor-slider id="scaleSlider" input disabled type="int" class="flex-1 fley-1" value="{{scale}}" max="500" min="20"></editor-slider>
+            <editor-slider id="scaleSlider" input disabled type="int" class="flex-1" value="{{scale}}" max="500" min="20"></editor-slider>
         </editor-toolbar>
-        <div id="content" class="view"  on-mousewheel="onMouseWheel">
-            <canvas id="canvas" width=20 height=20></canvas>
+        <div id="content" class="flex-1" on-mousewheel="onMouseWheel">
+            <canvas id="canvas"></canvas>
+            <svg id="svg"></svg>
+        </div>
+        <div id="editPanel" class="layout horizontal">
+            <div class="flex-1">
+                <div class="center">Border</div>
+            </div>
+            <div class="flex-2" class="layout vertical">
+                <div class="layout horizontal">
+                    <div class="flex-1 center">L</div>
+                    <editor-unit-input id="inputL" min="0" on-value-changed="_onInputChanged" class="flex-3" value="{{leftPos}}"></editor-unit-input>
+                    <div class="flex-1 center">T</div>
+                    <editor-unit-input id="inputT" min="0" on-value-changed="_onInputChanged" class="flex-3" value="{{topPos}}"></editor-unit-input>
+                </div>
+                <div class="layout horizontal">
+                    <div class="flex-1 center">R</div>
+                    <editor-unit-input id="inputR" min="0" on-value-changed="_onInputChanged" class="flex-3" value="{{rightPos}}"></editor-unit-input>
+                    <div class="flex-1 center">B</div>
+                    <editor-unit-input id="inputB" min="0" on-value-changed="_onInputChanged" class="flex-3" value="{{bottomPos}}"></editor-unit-input>
+                </div>
+            </div>
         </div>
     </template>
 

@@ -1,14 +1,13 @@
-.view {
-    box-shadow: inset 0 0 15px 5px rgba(0,0,0,0.5);
-    background: #292929;
+:host {
+    @apply(--layout-vertical)
 }
 
 #content {
-    position: absolute;
-    top: 25px;
-    right: 0px;
-    bottom: 0px;
-    left: 0px;
+    position: relative;
+    top: 0; left: 0; bottom: 0; right: 0;
+
+    box-shadow: inset 0 0 15px 5px rgba(0,0,0,0.5);
+    background: #292929;
 }
 
 canvas {
@@ -20,4 +19,22 @@ canvas {
     background-image: url('packages://inspector/static/checkerboard-32x32.png');
     background-size: 32px 32px;
     background-position: center center;
+}
+
+svg {
+    position: absolute;
+}
+
+#editPanel {
+    position:absolute;
+    right:15px;
+    bottom:0px;
+    width:300px;
+    height:50px;
+}
+
+div.center {
+    padding: 3px 0 0 0;
+    text-align: center;
+    color: gray;
 }
