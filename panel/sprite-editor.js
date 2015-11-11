@@ -1,3 +1,4 @@
+var Path = require('fire-path');
 
 Editor.registerPanel( 'sprite-editor.panel', {
     is : 'sprite-editor',
@@ -121,14 +122,56 @@ Editor.registerPanel( 'sprite-editor.panel', {
         if ( !theSprite)
             return;
 
-        this.$.scaleSlider.disabled = false;
-        this.scale = 100;
+        this._loadMeta( theSprite, function ( err, assetType, meta ) {
+            if ( err ) {
+                Editor.error( 'Failed to load meta %s, Message: %s', theSprite, err.stack);
+                return;
+            }
 
-        this._image = new Image();
-        this._image.onload = function () {
-            this.resize(this._image.width, this._image.height);
-        }.bind(this);
-        this._image.src = theSprite;
+            this.$.scaleSlider.disabled = false;
+            this.scale = 100;
+
+            this._image = new Image();
+            this._image.onload = function () {
+                this.resize(this._image.width, this._image.height);
+            }.bind(this);
+            this._image.src = meta.__path__;
+        }.bind(this));
+    },
+
+    _loadMeta: function ( id, cb ) {
+        if ( id.indexOf('mount-') === 0 ) {
+            if ( cb ) cb (new Error('Not support mount type assets.'));
+            return;
+        }
+
+        Editor.assetdb.queryMetaInfoByUuid( id, function ( info ) {
+            if ( !info ) {
+                if ( cb ) cb ( new Error('Can not find asset path by uuid ' + id) );
+                return;
+            }
+
+            var jsonObj = JSON.parse(info.json);
+            var assetType = jsonObj['asset-type'];
+            if (assetType !== 'texture') {
+                if (cb) cb (new Error('Only support texture type assets now.'));
+                return;
+            }
+
+            var metaCtor = Editor.metas[assetType];
+            if ( !metaCtor ) {
+                if ( cb ) cb ( new Error('Can not find meta by type ' + assetType) );
+                return;
+            }
+
+            var meta = new metaCtor();
+            meta.deserialize(jsonObj);
+            meta.__name__ = Path.basenameNoExt(info.assetPath);
+            meta.__path__ = info.assetPath;
+            meta.__mtime__ = info.assetMtime;
+
+            if ( cb ) cb ( null, assetType, meta );
+        }.bind(this));
     },
 
     _scaleChanged : function() {
