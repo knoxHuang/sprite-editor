@@ -1,4 +1,5 @@
 var Path = require('fire-path');
+var GizmosUtils = Editor.require('packages://fire-gizmos/gizmos/utils');
 
 Editor.registerPanel( 'sprite-editor.panel', {
     is : 'sprite-editor',
@@ -242,9 +243,51 @@ Editor.registerPanel( 'sprite-editor.panel', {
         this.drawEditElements();
     },
 
-    drawLine: function(startX, startY, endX, endY) {
-        var lineAttr = { width: 1, color: 'rgb(0, 255, 0)'};
-        return this._svg.line(startX, startY, endX, endY).stroke(lineAttr);
+    svgElementMoved: function (id, dx, dy) {
+        var movedX = dx / (this.scale / 100);
+        var movedY = dy / (this.scale / 100);
+        if (movedX > 0)
+            movedX = Math.floor(movedX);
+        else
+            movedX = Math.ceil(movedX);
+
+        if (movedY > 0)
+            movedY = Math.floor(movedY);
+        else
+            movedY = Math.ceil(movedY);
+
+        if (Math.abs(movedX) > 0) {
+            if (id.indexOf('l') >= 0) {
+                var newLeftValue = this._startLeftPos + movedX;
+                this.leftPos = this.correctPosValue(newLeftValue, 0, this._image.width - this.rightPos);
+            }
+            if (id.indexOf('r') >= 0) {
+                var newRightValue = this._startRightPos - movedX;
+                this.rightPos = this.correctPosValue(newRightValue, 0, this._image.width - this.leftPos);
+            }
+        }
+
+        if (Math.abs(movedY) > 0) {
+            if (id.indexOf('t') >= 0) {
+                var newTopValue = this._startTopPos + movedY;
+                this.topPos = this.correctPosValue(newTopValue, 0, this._image.height - this.bottomPos);
+            }
+            if (id.indexOf('b') >= 0) {
+                var newBottomValue = this._startBottomPos - movedY;
+                this.bottomPos = this.correctPosValue(newBottomValue, 0, this._image.height - this.topPos);
+            }
+        }
+    },
+
+    drawLine: function(startX, startY, endX, endY, lineID) {
+        var start = { x: startX, y: startY };
+        var end = { x: endX, y: endY };
+        var callbacks = {};
+        callbacks.update = function(dx, dy) {
+                this.svgElementMoved(lineID, dx, dy);
+        }.bind(this);
+
+        return GizmosUtils.lineTool(this._svg, start, end, 'rgb(0, 255, 0)', callbacks);
     },
 
     moveDotTo: function(dot, posX, posY) {
@@ -281,10 +324,10 @@ Editor.registerPanel( 'sprite-editor.panel', {
         this.updateBorderPos(bcr);
 
         // 4个边
-        this.lineLeft = this.drawLine(this._borderLeft, bcr.bottom, this._borderLeft, bcr.top);
-        this.lineRight = this.drawLine(this._borderRight, bcr.bottom, this._borderRight, bcr.top);
-        this.lineTop = this.drawLine(bcr.left, this._borderTop, bcr.right, this._borderTop);
-        this.lineBottom = this.drawLine(bcr.left, this._borderBottom, bcr.right, this._borderBottom);
+        this.lineLeft = this.drawLine(this._borderLeft, bcr.bottom, this._borderLeft, bcr.top, 'l');
+        this.lineRight = this.drawLine(this._borderRight, bcr.bottom, this._borderRight, bcr.top, 'r');
+        this.lineTop = this.drawLine(bcr.left, this._borderTop, bcr.right, this._borderTop, 't');
+        this.lineBottom = this.drawLine(bcr.left, this._borderBottom, bcr.right, this._borderBottom, 'b');
 
         // 4个交点
         this.dotLB = this.drawDot(this._borderLeft, this._borderBottom, 'lb');
