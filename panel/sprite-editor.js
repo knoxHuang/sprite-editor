@@ -35,79 +35,26 @@ Editor.registerPanel( 'sprite-editor.panel', {
     ready : function() {
         this._svg = SVG(this.$.svg);
         this._svg.spof();
-        this._selectDot = null;
 
-        this.dotNormalColor = 'rgb(0, 255, 0)';
-        this.dotSelectColor = 'rgb(0, 0, 255)';
+        this._svgColor = '#5c5';
+        this._dotSize = 6;
 
         // init variables
         this._borderLeft = 0;
         this._borderRight = 0;
         this._borderBottom = 0;
         this._borderTop = 0;
-        this._mousedownPosX = 0;
-        this._mousedownPosY = 0;
+
         this._startLeftPos = 0;
         this._startRightPos = 0;
         this._startTopPos = 0;
         this._startBottomPos = 0;
 
         this.addListeners();
+        this.setWidgetsDisabled(true);
     },
 
     addListeners: function() {
-        var unselectDot = function(event) {
-            if (! this._selectDot)
-                return;
-            event.stopPropagation();
-            this._selectDot.fill(this.dotNormalColor);
-            this._selectDot = null;
-        }.bind(this);
-
-        var moveDot = function(event) {
-            if (this._selectDot) {
-                event.stopPropagation();
-
-                var movedX = (event.x - this._mousedownPosX) / (this.scale / 100);
-                var movedY = (event.y - this._mousedownPosY) / (this.scale / 100);
-                if (movedX > 0)
-                    movedX = Math.floor(movedX);
-                else
-                    movedX = Math.ceil(movedX);
-
-                if (movedY > 0)
-                    movedY = Math.floor(movedY);
-                else
-                    movedY = Math.ceil(movedY);
-
-                if (Math.abs(movedX) > 0) {
-                    if (this._selectDot.id.indexOf('l') >= 0) {
-                        var newLeftValue = this._startLeftPos + movedX;
-                        this.leftPos = this.correctPosValue(newLeftValue, 0, this._image.width - this.rightPos);
-                    }
-                    if (this._selectDot.id.indexOf('r') >= 0) {
-                        var newRightValue = this._startRightPos - movedX;
-                        this.rightPos = this.correctPosValue(newRightValue, 0, this._image.width - this.leftPos);
-                    }
-                }
-
-                if (Math.abs(movedY) > 0) {
-                    if (this._selectDot.id.indexOf('t') >= 0) {
-                        var newTopValue = this._startTopPos + movedY;
-                        this.topPos = this.correctPosValue(newTopValue, 0, this._image.height - this.bottomPos);
-                    }
-                    if (this._selectDot.id.indexOf('b') >= 0) {
-                        var newBottomValue = this._startBottomPos - movedY;
-                        this.bottomPos = this.correctPosValue(newBottomValue, 0, this._image.height - this.topPos);
-                    }
-                }
-            }
-        }.bind(this);
-
-        this._svg.on('mouseup', unselectDot);
-        //this._svg.on('mouseout', unselectDot);
-        this._svg.on('mousemove', moveDot);
-
         window.addEventListener('resize', function ( event ) {
             if (this._image)
                 this.resize(this._image.width * this.scale / 100,
@@ -117,6 +64,14 @@ Editor.registerPanel( 'sprite-editor.panel', {
 
     'sprite-editor:open-sprite' : function( theSprite ) {
         this.openSprite(theSprite);
+    },
+
+    setWidgetsDisabled: function(value) {
+        this.$.inputL.disabled = value;
+        this.$.inputR.disabled = value;
+        this.$.inputT.disabled = value;
+        this.$.inputB.disabled = value;
+        this.$.scaleSlider.disabled = value;
     },
 
     openSprite : function(theSprite) {
@@ -129,7 +84,7 @@ Editor.registerPanel( 'sprite-editor.panel', {
                 return;
             }
 
-            this.$.scaleSlider.disabled = false;
+            this.setWidgetsDisabled(false);
             this.scale = 100;
 
             this._image = new Image();
@@ -279,40 +234,36 @@ Editor.registerPanel( 'sprite-editor.panel', {
         }
     },
 
-    drawLine: function(startX, startY, endX, endY, lineID) {
-        var start = { x: startX, y: startY };
-        var end = { x: endX, y: endY };
+    svgCallbacks: function(svgId) {
         var callbacks = {};
-        callbacks.update = function(dx, dy) {
-                this.svgElementMoved(lineID, dx, dy);
-        }.bind(this);
-
-        return GizmosUtils.lineTool(this._svg, start, end, 'rgb(0, 255, 0)', callbacks);
-    },
-
-    moveDotTo: function(dot, posX, posY) {
-        if (dot)
-            dot.move(posX - 3, posY - 3);
-    },
-
-    drawDot: function(posX, posY, dotID) {
-        var rect = this._svg.rect(6, 6).fill(this.dotNormalColor);
-        this.moveDotTo(rect, posX, posY);
-        rect.id = dotID;
-
-        rect.on('mousedown', function(event) {
-            event.stopPropagation();
-            this._selectDot = rect;
-            rect.fill(this.dotSelectColor);
-            this._mousedownPosX = event.x;
-            this._mousedownPosY = event.y;
+        callbacks.start = function() {
             this._startLeftPos = this.leftPos;
             this._startRightPos = this.rightPos;
             this._startTopPos = this.topPos;
             this._startBottomPos = this.bottomPos;
-        }.bind(this));
+        }.bind(this);
 
-        return rect;
+        callbacks.update = function(dx, dy) {
+            this.svgElementMoved(svgId, dx, dy);
+        }.bind(this);
+        return callbacks;
+    },
+
+    drawLine: function(startX, startY, endX, endY, lineID) {
+        var start = { x: startX, y: startY };
+        var end = { x: endX, y: endY };
+        return GizmosUtils.lineTool(this._svg, start, end, this._svgColor, this.svgCallbacks(lineID));
+    },
+
+    drawDot: function(posX, posY, dotID) {
+        var theDot = GizmosUtils.circleTool(this._svg, this._dotSize, this._svgColor, 'none', this.svgCallbacks(dotID));
+        this.moveDotTo(theDot, posX, posY);
+        return theDot;
+    },
+
+    moveDotTo: function(dot, posX, posY) {
+        if (dot)
+            dot.move(posX - this._dotSize / 2, posY - this._dotSize / 2);
     },
 
     drawEditElements: function() {
