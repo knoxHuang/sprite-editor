@@ -6,7 +6,17 @@
     <link rel="import" type="css" href="sprite-editor.css">
     <template>
         <editor-toolbar>
-            <editor-slider id="scaleSlider" input disabled type="int" class="flex-1" value="{{scale}}" max="500" min="20"></editor-slider>
+            <span class="flex-1 layout horizontal">
+                <editor-slider id="scaleSlider" input disabled="{{!hasContent}}" type="int" class="flex-1" value="{{scale}}" max="500" min="20"></editor-slider>
+            </span>
+            <span class="layout horizontal">
+                <editor-button disabled="{{!dirty}}" class="red" on-click="_onRevert">
+                    <i class="fa fa-close"></i>
+                </editor-button>
+                <editor-button disabled="{{!dirty}}" class='green' on-click="_onApply">
+                    <i class="fa fa-check"></i>
+                </editor-button>
+            </span>
         </editor-toolbar>
         <div id="content" class="flex-1" on-mousewheel="onMouseWheel">
             <canvas id="canvas"></canvas>
@@ -19,15 +29,15 @@
             <div class="flex-2" class="layout vertical">
                 <div class="layout horizontal">
                     <div class="flex-1 center">L</div>
-                    <editor-unit-input id="inputL" min="0" on-value-changed="_onInputChanged" class="flex-3" value="{{leftPos}}"></editor-unit-input>
+                    <editor-unit-input id="inputL" disabled="{{!hasContent}}" min="0" on-value-changed="_onInputChanged" class="flex-3" value="{{leftPos}}"></editor-unit-input>
                     <div class="flex-1 center">T</div>
-                    <editor-unit-input id="inputT" min="0" on-value-changed="_onInputChanged" class="flex-3" value="{{topPos}}"></editor-unit-input>
+                    <editor-unit-input id="inputT" disabled="{{!hasContent}}" min="0" on-value-changed="_onInputChanged" class="flex-3" value="{{topPos}}"></editor-unit-input>
                 </div>
                 <div class="layout horizontal">
                     <div class="flex-1 center">R</div>
-                    <editor-unit-input id="inputR" min="0" on-value-changed="_onInputChanged" class="flex-3" value="{{rightPos}}"></editor-unit-input>
+                    <editor-unit-input id="inputR" disabled="{{!hasContent}}" min="0" on-value-changed="_onInputChanged" class="flex-3" value="{{rightPos}}"></editor-unit-input>
                     <div class="flex-1 center">B</div>
-                    <editor-unit-input id="inputB" min="0" on-value-changed="_onInputChanged" class="flex-3" value="{{bottomPos}}"></editor-unit-input>
+                    <editor-unit-input id="inputB" disabled="{{!hasContent}}" min="0" on-value-changed="_onInputChanged" class="flex-3" value="{{bottomPos}}"></editor-unit-input>
                 </div>
             </div>
         </div>

@@ -5,6 +5,14 @@ Editor.registerPanel( 'sprite-editor.panel', {
     is : 'sprite-editor',
 
     properties: {
+        hasContent: {
+            type: Boolean,
+            value: false
+        },
+        dirty: {
+            type: Boolean,
+            value: false
+        },
         scale: {
             type: Number,
             value: 100,
@@ -50,8 +58,12 @@ Editor.registerPanel( 'sprite-editor.panel', {
         this._startTopPos = 0;
         this._startBottomPos = 0;
 
+        this._metaLeftPos = 0;
+        this._metaRightPos = 0;
+        this._metaTopPos = 0;
+        this._metaBottomPos = 0;
+
         this.addListeners();
-        this.setWidgetsDisabled(true);
     },
 
     addListeners: function() {
@@ -66,14 +78,6 @@ Editor.registerPanel( 'sprite-editor.panel', {
         this.openSprite(theSprite);
     },
 
-    setWidgetsDisabled: function(value) {
-        this.$.inputL.disabled = value;
-        this.$.inputR.disabled = value;
-        this.$.inputT.disabled = value;
-        this.$.inputB.disabled = value;
-        this.$.scaleSlider.disabled = value;
-    },
-
     openSprite : function(theSprite) {
         if ( !theSprite)
             return;
@@ -84,7 +88,7 @@ Editor.registerPanel( 'sprite-editor.panel', {
                 return;
             }
 
-            this.setWidgetsDisabled(false);
+            this.hasContent = true;
             this.scale = 100;
 
             this._image = new Image();
@@ -125,6 +129,17 @@ Editor.registerPanel( 'sprite-editor.panel', {
             meta.__name__ = Path.basenameNoExt(info.assetPath);
             meta.__path__ = info.assetPath;
             meta.__mtime__ = info.assetMtime;
+
+            // TODO init the meta values
+            //this._metaLeftPos = meta.__leftPos__;
+            //this._metaRightPos = meta.__rightPos__;
+            //this._metaTopPos = meta.__topPos__;
+            //this._metaBottomPos = meta.__bottomPos__;
+
+            this.leftPos = this._metaLeftPos;
+            this.rightPos = this._metaRightPos;
+            this.topPos = this._metaTopPos;
+            this.bottomPos = this._metaBottomPos;
 
             if ( cb ) cb ( null, assetType, meta );
         }.bind(this));
@@ -303,7 +318,19 @@ Editor.registerPanel( 'sprite-editor.panel', {
         return newValue;
     },
 
+    checkState: function() {
+        var leftDirty = this.leftPos !== this._metaLeftPos;
+        var rightDirty = this.rightPos !== this._metaRightPos;
+        var topDirty = this.topPos !== this._metaTopPos;
+        var bottomDirty = this.bottomPos !== this._metaBottomPos;
+
+        this.dirty = leftDirty || rightDirty || topDirty || bottomDirty;
+    },
+
     leftPosChanged: function() {
+        if ( !this._image )
+            return;
+
         var bcr = this.getCanvasRect();
         this.updateBorderPos(bcr);
 
@@ -315,9 +342,14 @@ Editor.registerPanel( 'sprite-editor.panel', {
         // move line left
         if (this.lineLeft)
             this.lineLeft.plot(this._borderLeft, bcr.bottom, this._borderLeft, bcr.top);
+
+        this.checkState();
     },
 
     rightPosChanged: function() {
+        if ( !this._image )
+            return;
+
         var bcr = this.getCanvasRect();
         this.updateBorderPos(bcr);
 
@@ -329,9 +361,14 @@ Editor.registerPanel( 'sprite-editor.panel', {
         // move line left
         if (this.lineRight)
             this.lineRight.plot(this._borderRight, bcr.bottom, this._borderRight, bcr.top);
+
+        this.checkState();
     },
 
     topPosChanged: function() {
+        if ( !this._image )
+            return;
+
         var bcr = this.getCanvasRect();
         this.updateBorderPos(bcr);
 
@@ -343,9 +380,14 @@ Editor.registerPanel( 'sprite-editor.panel', {
         // move line top
         if (this.lineTop)
             this.lineTop.plot(bcr.left, this._borderTop, bcr.right, this._borderTop);
+
+        this.checkState();
     },
 
     bottomPosChanged: function() {
+        if ( !this._image )
+            return;
+
         var bcr = this.getCanvasRect();
         this.updateBorderPos(bcr);
 
@@ -357,6 +399,8 @@ Editor.registerPanel( 'sprite-editor.panel', {
         // move line bottom
         if (this.lineBottom)
             this.lineBottom.plot(bcr.left, this._borderBottom, bcr.right, this._borderBottom);
+
+        this.checkState();
     },
 
     onMouseWheel: function(event) {
@@ -366,5 +410,37 @@ Editor.registerPanel( 'sprite-editor.panel', {
         event.stopPropagation();
         var newScale = Editor.Utils.smoothScale(this.scale / 100, event.wheelDelta);
         this.scale = newScale * 100;
+    },
+
+    _onRevert: function(event) {
+        if ( !this._image )
+            return;
+
+        if (event)
+            event.stopPropagation();
+
+        this.leftPos = this._metaLeftPos;
+        this.rightPos = this._metaRightPos;
+        this.topPos = this._metaTopPos;
+        this.bottomPos = this._metaBottomPos;
+
+        this.checkState();
+    },
+
+    _onApply: function(event) {
+        if ( !this._image )
+            return;
+
+        if (event)
+            event.stopPropagation();
+
+        this._metaLeftPos = this.leftPos;
+        this._metaRightPos = this.rightPos;
+        this._metaTopPos = this.topPos;
+        this._metaBottomPos = this.bottomPos;
+
+        // TODO record the meta data
+
+        this.checkState();
     }
 });
