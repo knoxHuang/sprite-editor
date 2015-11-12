@@ -272,7 +272,8 @@ Editor.registerPanel( 'sprite-editor.panel', {
     },
 
     drawDot: function(posX, posY, dotID) {
-        var theDot = GizmosUtils.circleTool(this._svg, this._dotSize, this._svgColor, 'none', this.svgCallbacks(dotID));
+        var attr = {color: this._svgColor};
+        var theDot = GizmosUtils.circleTool(this._svg, this._dotSize, attr, attr, this.svgCallbacks(dotID));
         this.moveDotTo(theDot, posX, posY);
         return theDot;
     },
