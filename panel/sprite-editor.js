@@ -1,5 +1,6 @@
-var Path = require('fire-path');
-var GizmosUtils = Editor.require('packages://fire-gizmos/gizmos/utils');
+const Path = require('fire-path');
+const GizmosUtils = Editor.require('packages://fire-gizmos/gizmos/utils');
+const SVG = require('svg.js');
 
 Editor.registerPanel( 'sprite-editor.panel', {
     is : 'sprite-editor',
