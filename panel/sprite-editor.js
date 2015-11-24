@@ -64,7 +64,13 @@ Editor.registerPanel( 'sprite-editor.panel', {
         this._metaTopPos = 0;
         this._metaBottomPos = 0;
 
+        this._meta = null;
+
         this.addListeners();
+    },
+
+    'panel:run': function (argv) {
+        this.openSprite(argv.uuid);
     },
 
     addListeners: function() {
@@ -73,10 +79,6 @@ Editor.registerPanel( 'sprite-editor.panel', {
                 this.resize(this._image.width * this.scale / 100,
                             this._image.height * this.scale / 100);
         }.bind(this));
-    },
-
-    'sprite-editor:open-sprite' : function( theSprite ) {
-        this.openSprite(theSprite);
     },
 
     openSprite : function(theSprite) {
@@ -92,11 +94,14 @@ Editor.registerPanel( 'sprite-editor.panel', {
             this.hasContent = true;
             this.scale = 100;
 
-            this._image = new Image();
-            this._image.onload = function () {
-                this.resize(this._image.width, this._image.height);
-            }.bind(this);
-            this._image.src = meta.__path__;
+            Editor.assetdb.queryMetaInfoByUuid(meta.rawTextureUuid, function(info) {
+                this._image = new Image();
+                this._image.src = info.assetPath;
+                this._image.onload = function () {
+                    this.resize(this._image.width, this._image.height);
+                }.bind(this);
+            }.bind(this));
+
         }.bind(this));
     },
 
@@ -112,21 +117,13 @@ Editor.registerPanel( 'sprite-editor.panel', {
                 return;
             }
 
-            var jsonObj = JSON.parse(info.json);
-            var assetType = jsonObj['asset-type'];
-            if (assetType !== 'texture') {
-                if (cb) cb (new Error('Only support texture type assets now.'));
+            var assetType = info.assetType;//info['asset-type'];
+            if (assetType !== 'sprite-frame') {
+                if (cb) cb (new Error('Only support sprite-frame type assets now.'));
                 return;
             }
 
-            var metaCtor = Editor.metas[assetType];
-            if ( !metaCtor ) {
-                if ( cb ) cb ( new Error('Can not find meta by type ' + assetType) );
-                return;
-            }
-
-            var meta = new metaCtor();
-            meta.deserialize(jsonObj);
+            var meta = JSON.parse(info.json);
             meta.__name__ = Path.basenameNoExt(info.assetPath);
             meta.__path__ = info.assetPath;
             meta.__mtime__ = info.assetMtime;
@@ -141,6 +138,8 @@ Editor.registerPanel( 'sprite-editor.panel', {
             this.rightPos = this._metaRightPos;
             this.topPos = this._metaTopPos;
             this.bottomPos = this._metaBottomPos;
+
+            this._meta = meta;
 
             if ( cb ) cb ( null, assetType, meta );
         }.bind(this));
@@ -442,6 +441,19 @@ Editor.registerPanel( 'sprite-editor.panel', {
         this._metaBottomPos = this.bottomPos;
 
         // TODO record the meta data
+
+        if ( this._meta ) {
+            var meta = this._meta;
+            var uuid = meta.uuid;
+
+            meta.borderTop = this.leftPos;
+            meta.borderBottom = this.rightPos;
+            meta.borderLeft = this.topPos;
+            meta.borderRight = this.bottomPos;
+
+            var jsonString = JSON.stringify(meta);
+            Editor.assetdb.saveMeta( uuid, jsonString );
+        }
 
         this.checkState();
     }

@@ -23,7 +23,7 @@
       "height": 500,
       "min-height": 325,
       "messages": [
-        "sprite-editor:open-sprite"
+        "panel:run"
       ]
     }
   }
