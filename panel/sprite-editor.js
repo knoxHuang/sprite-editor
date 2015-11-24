@@ -1,3 +1,4 @@
+(function () {
 const Path = require('fire-path');
 const GizmosUtils = Editor.require('packages://fire-gizmos/gizmos/utils');
 const SVG = require('svg.js');
@@ -441,3 +442,5 @@ Editor.registerPanel( 'sprite-editor.panel', {
         this.checkState();
     }
 });
+
+})();
