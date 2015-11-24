@@ -258,14 +258,30 @@ Editor.registerPanel( 'sprite-editor.panel', {
     },
 
     drawLine: function(startX, startY, endX, endY, lineID) {
-        var start = { x: startX, y: startY };
-        var end = { x: endX, y: endY };
-        return GizmosUtils.lineTool(this._svg, start, end, this._svgColor, this.svgCallbacks(lineID));
+        var start = {x: startX, y: startY};
+        var end = {x: endX, y: endY};
+        var line = GizmosUtils.lineTool(this._svg, start, end, this._svgColor, this.svgCallbacks(lineID));
+        if (lineID === 'l' || lineID === 'r') {
+            line.style('cursor', 'col-resize');
+        }
+        else if (lineID === 't' || lineID === 'b') {
+            line.style('cursor', 'row-resize');
+        }
+        return line;
     },
 
     drawDot: function(posX, posY, dotID) {
         var attr = {color: this._svgColor};
         var theDot = GizmosUtils.circleTool(this._svg, this._dotSize, attr, attr, this.svgCallbacks(dotID));
+        if (dotID === 'l' || dotID === 'r' || dotID === 't' || dotID === 'b') {
+            theDot.style('cursor', 'pointer');
+        }
+        else if (dotID === 'lb' || dotID === 'rt'){
+            theDot.style('cursor', 'nesw-resize');
+        }
+        else if (dotID === 'rb' || dotID === 'lt') {
+            theDot.style('cursor', 'nwse-resize');
+        }
         this.moveDotTo(theDot, posX, posY);
         return theDot;
     },
