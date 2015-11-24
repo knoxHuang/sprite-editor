@@ -59,11 +59,6 @@ Editor.registerPanel( 'sprite-editor.panel', {
         this._startTopPos = 0;
         this._startBottomPos = 0;
 
-        this._metaLeftPos = 0;
-        this._metaRightPos = 0;
-        this._metaTopPos = 0;
-        this._metaBottomPos = 0;
-
         this._meta = null;
 
         this.addListeners();
@@ -101,7 +96,7 @@ Editor.registerPanel( 'sprite-editor.panel', {
                     this.resize(this._image.width, this._image.height);
                 }.bind(this);
             }.bind(this));
-
+            
         }.bind(this));
     },
 
@@ -128,18 +123,11 @@ Editor.registerPanel( 'sprite-editor.panel', {
             meta.__path__ = info.assetPath;
             meta.__mtime__ = info.assetMtime;
 
-            // TODO init the meta values
-            //this._metaLeftPos = meta.__leftPos__;
-            //this._metaRightPos = meta.__rightPos__;
-            //this._metaTopPos = meta.__topPos__;
-            //this._metaBottomPos = meta.__bottomPos__;
-
-            this.leftPos = this._metaLeftPos;
-            this.rightPos = this._metaRightPos;
-            this.topPos = this._metaTopPos;
-            this.bottomPos = this._metaBottomPos;
-
             this._meta = meta;
+            this.leftPos = meta.borderLeft;
+            this.rightPos = meta.borderRight;
+            this.topPos = meta.borderTop;
+            this.bottomPos = meta.borderBottom;
 
             if ( cb ) cb ( null, assetType, meta );
         }.bind(this));
@@ -154,9 +142,13 @@ Editor.registerPanel( 'sprite-editor.panel', {
     },
 
     _onInputChanged: function(event) {
+        if (!this._image || !this._meta) {
+            return;
+        }
         var srcEle = event.srcElement;
         var theValue = srcEle.value;
         var maxValue = 0;
+
         switch(srcEle.id) {
             case 'inputL':
                 maxValue = this._image.width - this.rightPos;
@@ -320,10 +312,10 @@ Editor.registerPanel( 'sprite-editor.panel', {
     },
 
     checkState: function() {
-        var leftDirty = this.leftPos !== this._metaLeftPos;
-        var rightDirty = this.rightPos !== this._metaRightPos;
-        var topDirty = this.topPos !== this._metaTopPos;
-        var bottomDirty = this.bottomPos !== this._metaBottomPos;
+        var leftDirty = this.leftPos !== this._meta.borderLeft;
+        var rightDirty = this.rightPos !== this._meta.borderRight;
+        var topDirty = this.topPos !== this._meta.borderTop;
+        var bottomDirty = this.bottomPos !== this._meta.borderBottom;
 
         this.dirty = leftDirty || rightDirty || topDirty || bottomDirty;
     },
@@ -414,46 +406,37 @@ Editor.registerPanel( 'sprite-editor.panel', {
     },
 
     _onRevert: function(event) {
-        if ( !this._image )
+        if ( !this._image || !this._meta)
             return;
 
         if (event)
             event.stopPropagation();
 
-        this.leftPos = this._metaLeftPos;
-        this.rightPos = this._metaRightPos;
-        this.topPos = this._metaTopPos;
-        this.bottomPos = this._metaBottomPos;
+        var meta = this._meta;
+        this.leftPos = meta.borderLeft;
+        this.rightPos = meta.borderRight;
+        this.topPos = meta.borderTop;
+        this.bottomPos = meta.borderBottom;
 
         this.checkState();
     },
 
     _onApply: function(event) {
-        if ( !this._image )
+        if ( !this._image || !this._meta)
             return;
 
         if (event)
             event.stopPropagation();
 
-        this._metaLeftPos = this.leftPos;
-        this._metaRightPos = this.rightPos;
-        this._metaTopPos = this.topPos;
-        this._metaBottomPos = this.bottomPos;
+        var meta = this._meta;
+        meta.borderTop = this.topPos;
+        meta.borderBottom = this.bottomPos;
+        meta.borderLeft = this.leftPos;
+        meta.borderRight = this.rightPos;
 
-        // TODO record the meta data
-
-        if ( this._meta ) {
-            var meta = this._meta;
-            var uuid = meta.uuid;
-
-            meta.borderTop = this.leftPos;
-            meta.borderBottom = this.rightPos;
-            meta.borderLeft = this.topPos;
-            meta.borderRight = this.bottomPos;
-
-            var jsonString = JSON.stringify(meta);
-            Editor.assetdb.saveMeta( uuid, jsonString );
-        }
+        var jsonString = JSON.stringify(meta);
+        var uuid = meta.uuid;
+        Editor.assetdb.saveMeta( uuid, jsonString );
 
         this.checkState();
     }
