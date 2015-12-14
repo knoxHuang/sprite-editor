@@ -7,12 +7,6 @@
   "hosts": {
     "editor-framework": "^0.3.15"
   },
-  "menus": {
-    "Test/Sprite Editor": {
-      "message": "sprite-editor:open",
-      "accelerator": "CmdOrCtrl+Shift+O"
-    }
-  },
   "panels": {
     "panel": {
       "frame": "panel/sprite-editor.html",
