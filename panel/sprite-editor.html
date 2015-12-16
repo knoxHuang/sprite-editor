@@ -21,20 +21,20 @@
         </div>
         <div id="editPanel" class="layout horizontal">
             <div class="flex-1">
-                <div class="center">Border</div>
+                <div class="center">[[_T('SPRITE_EDITOR.border')]]</div>
             </div>
-            <div class="flex-2" class="layout vertical">
+            <div class="flex-4" class="layout vertical">
                 <div class="layout horizontal">
-                    <div class="flex-1 center">L</div>
-                    <editor-unit-input id="inputL" disabled="{{!hasContent}}" min="0" on-value-changed="_onInputChanged" class="flex-3" value="{{leftPos}}"></editor-unit-input>
-                    <div class="flex-1 center">T</div>
-                    <editor-unit-input id="inputT" disabled="{{!hasContent}}" min="0" on-value-changed="_onInputChanged" class="flex-3" value="{{topPos}}"></editor-unit-input>
+                    <div class="flex-2 center">[[_T('SPRITE_EDITOR.left')]]</div>
+                    <editor-unit-input id="inputL" disabled="{{!hasContent}}" min="0" on-value-changed="_onInputChanged" class="flex-2" value="{{leftPos}}"></editor-unit-input>
+                    <div class="flex-2 center">[[_T('SPRITE_EDITOR.top')]]</div>
+                    <editor-unit-input id="inputT" disabled="{{!hasContent}}" min="0" on-value-changed="_onInputChanged" class="flex-2" value="{{topPos}}"></editor-unit-input>
                 </div>
                 <div class="layout horizontal">
-                    <div class="flex-1 center">R</div>
-                    <editor-unit-input id="inputR" disabled="{{!hasContent}}" min="0" on-value-changed="_onInputChanged" class="flex-3" value="{{rightPos}}"></editor-unit-input>
-                    <div class="flex-1 center">B</div>
-                    <editor-unit-input id="inputB" disabled="{{!hasContent}}" min="0" on-value-changed="_onInputChanged" class="flex-3" value="{{bottomPos}}"></editor-unit-input>
+                    <div class="flex-2 center">[[_T('SPRITE_EDITOR.right')]]</div>
+                    <editor-unit-input id="inputR" disabled="{{!hasContent}}" min="0" on-value-changed="_onInputChanged" class="flex-2" value="{{rightPos}}"></editor-unit-input>
+                    <div class="flex-2 center">[[_T('SPRITE_EDITOR.bottom')]]</div>
+                    <editor-unit-input id="inputB" disabled="{{!hasContent}}" min="0" on-value-changed="_onInputChanged" class="flex-2" value="{{bottomPos}}"></editor-unit-input>
                 </div>
             </div>
         </div>

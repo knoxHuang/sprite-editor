@@ -11,7 +11,7 @@
     "panel": {
       "frame": "panel/sprite-editor.html",
       "type": "dockable",
-      "title": "Sprite Editor",
+      "title": "i18n:SPRITE_EDITOR.title",
       "width": 500,
       "min-width": 325,
       "height": 500,

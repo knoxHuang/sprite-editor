@@ -65,6 +65,10 @@ Editor.registerPanel( 'sprite-editor.panel', {
         this.addListeners();
     },
 
+    _T: function (text_id) {
+        return Editor.T(text_id);
+    },
+
     'panel:run': function (argv) {
         this.openSprite(argv.uuid);
     },
