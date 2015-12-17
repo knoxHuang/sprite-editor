@@ -1,5 +1,6 @@
 :host {
     @apply(--layout-vertical)
+    font-size: 12px;
 }
 
 #content {
@@ -25,16 +26,35 @@ svg {
     position: absolute;
 }
 
-#editPanel {
+#pad {
     position:absolute;
-    right:15px;
-    bottom:0px;
-    width:300px;
-    height:50px;
+
+    right: 10px;
+    bottom: 10px;
+    width: 300px;
+    padding: 10px;
+
+    border-radius: 5px;
+
+    background: #474747;
 }
 
-div.center {
-    padding: 3px 0 0 0;
-    text-align: center;
-    color: gray;
+span.space {
+    width: 5px;
+    height: 5px;
+    display: inline-block;
+}
+
+.title {
+    text-align: right;
+    margin-right: 5px;
+    margin-bottom: 5px;
+    color: #aaa;
+    font-weight: bold;
+}
+
+.label {
+    text-align: right;
+    margin-right: 5px;
+    color: #aaa;
 }
