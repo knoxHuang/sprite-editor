@@ -61,6 +61,7 @@ Editor.registerPanel( 'sprite-editor.panel', {
         this._startBottomPos = 0;
 
         this._meta = null;
+        this._scalingSize = null;
 
         this.addListeners();
     },
@@ -75,9 +76,9 @@ Editor.registerPanel( 'sprite-editor.panel', {
 
     addListeners: function() {
         window.addEventListener('resize', function ( event ) {
-            if (this._image)
-                this.resize(this._image.width * this.scale / 100,
-                            this._image.height * this.scale / 100);
+            if ( !this._image && !this._meta )
+                return;
+            this.resize(this._meta.width * this.scale / 100, this._meta.height * this.scale / 100);
         }.bind(this));
     },
 
@@ -98,10 +99,10 @@ Editor.registerPanel( 'sprite-editor.panel', {
                 this._image = new Image();
                 this._image.src = info.assetPath;
                 this._image.onload = function () {
-                    this.resize(this._image.width, this._image.height);
+                    this.resize(this._meta.width, this._meta.height);
                 }.bind(this);
             }.bind(this));
-            
+
         }.bind(this));
     },
 
@@ -139,11 +140,10 @@ Editor.registerPanel( 'sprite-editor.panel', {
     },
 
     _scaleChanged : function() {
-        if ( !this._image )
+        if ( !this._image && !this._meta )
             return;
 
-        this.resize(this._image.width * this.scale / 100,
-                    this._image.height * this.scale / 100);
+        this.resize(this._meta.width * this.scale / 100, this._meta.height * this.scale / 100);
     },
 
     _onInputChanged: function(event) {
@@ -177,8 +177,23 @@ Editor.registerPanel( 'sprite-editor.panel', {
     },
 
     resize: function (width, height) {
-        this.$.canvas.width = width;
-        this.$.canvas.height = height;
+        var bcr = this.$.content.getBoundingClientRect();
+        var result = Editor.Utils.fitSize(
+            width,
+            height,
+            bcr.width,
+            bcr.height
+        );
+
+        if ( this._meta.rotated ) {
+            this._scalingSize = {
+                width: Math.ceil(result[1]),
+                height: Math.ceil(result[0])
+            }
+        }
+
+        this.$.canvas.width = Math.ceil(result[0]);
+        this.$.canvas.height = Math.ceil(result[1]);
 
         this.repaint();
     },
@@ -205,7 +220,40 @@ Editor.registerPanel( 'sprite-editor.panel', {
     repaint: function () {
         var ctx = this.$.canvas.getContext('2d');
         ctx.imageSmoothingEnabled = false;
-        ctx.drawImage( this._image, 0, 0, this.$.canvas.width, this.$.canvas.height );
+
+        var meta = this._meta;
+        var canvasWidth = this.$.canvas.width;
+        var canvasHeight = this.$.canvas.height;
+        var xPos, yPos;
+        var trimWidth, trimHeight;
+        if ( meta.rotated ) {
+            var tempXPos = canvasWidth / 2;
+            var tempYPos = canvasHeight / 2;
+            ctx.translate(tempXPos, tempYPos);
+            ctx.rotate(-90 * Math.PI / 180);
+            ctx.translate(-tempXPos, -tempYPos);
+
+            xPos = canvasWidth / 2 - this._scalingSize.width / 2;
+            yPos = canvasHeight / 2 - this._scalingSize.height / 2;
+            trimWidth = meta.height;
+            trimHeight = meta.width;
+            canvasWidth = this.$.canvas.height;
+            canvasHeight = this.$.canvas.width;
+        }
+        else {
+            xPos = 0;
+            yPos = 0;
+            trimWidth = meta.width;
+            trimHeight = meta.height;
+            canvasWidth = this.$.canvas.width;
+            canvasHeight = this.$.canvas.height;
+        }
+
+        ctx.drawImage(
+            this._image,
+            meta.trimX, meta.trimY, trimWidth, trimHeight,
+            xPos, yPos, canvasWidth, canvasHeight
+        );
 
         this.drawEditElements();
     },
