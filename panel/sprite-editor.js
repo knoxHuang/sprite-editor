@@ -89,7 +89,7 @@ Editor.registerPanel( 'sprite-editor.panel', {
     _refreshScaleSlider: function () {
         var bcr = this.$.content.getBoundingClientRect();
         // 如果窗口宽高相同就不需要重新计算Scale了
-        if (this._lastBcr && bcr === this._lastBcr) {
+        if (this._lastBcr && (bcr.width === this._lastBcr.width && bcr.height === this._lastBcr.height)) {
             return;
         }
         var newScale;
