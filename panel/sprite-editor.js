@@ -16,10 +16,11 @@ Editor.registerPanel( 'sprite-editor.panel', {
             value: false
         },
         scale: {
-            type: Number,
             value: 100,
             observer: '_scaleChanged'
         },
+        minScale: 20,
+        maxScale:500,
         leftPos: {
             type: Number,
             value: 0,
@@ -45,6 +46,8 @@ Editor.registerPanel( 'sprite-editor.panel', {
     ready : function() {
         this._svg = SVG(this.$.svg);
         this._svg.spof();
+
+        this._lastBcr = null;
 
         this._svgColor = '#5c5';
         this._dotSize = 6;
@@ -78,8 +81,28 @@ Editor.registerPanel( 'sprite-editor.panel', {
         window.addEventListener('resize', function ( event ) {
             if ( !this._image && !this._meta )
                 return;
+            this._refreshScaleSlider();
             this.resize(this._meta.width * this.scale / 100, this._meta.height * this.scale / 100);
         }.bind(this));
+    },
+    // 刷新 ScaleSlider 当前值 最小值 最大值
+    _refreshScaleSlider: function () {
+        var bcr = this.$.content.getBoundingClientRect();
+        // 如果窗口宽高相同就不需要重新计算Scale了
+        if (this._lastBcr && (bcr.width === this._lastBcr.width && bcr.height === this._lastBcr.height)) {
+            return;
+        }
+        var newScale;
+        if (bcr.width < bcr.height) {
+            newScale = (bcr.width / this._meta.width) * 100;
+        }
+        else {
+            newScale = (bcr.height / this._meta.height) * 100;
+        }
+        this.minScale = Math.ceil(newScale / 5);
+        this.maxScale = Math.ceil(newScale);
+        this.scale = Math.ceil((newScale + this.minScale) / 2);
+        this._lastBcr = this.$.content.getBoundingClientRect();
     },
 
     openSprite : function(theSprite) {
@@ -93,13 +116,13 @@ Editor.registerPanel( 'sprite-editor.panel', {
             }
 
             this.hasContent = true;
-            this.scale = 100;
+            this._refreshScaleSlider();
 
             Editor.assetdb.queryMetaInfoByUuid(meta.rawTextureUuid, function(info) {
                 this._image = new Image();
                 this._image.src = info.assetPath;
                 this._image.onload = function () {
-                    this.resize(this._meta.width, this._meta.height);
+                    this.resize(this._meta.width * this.scale / 100, this._meta.height * this.scale / 100);
                 }.bind(this);
             }.bind(this));
 
@@ -140,7 +163,7 @@ Editor.registerPanel( 'sprite-editor.panel', {
     },
 
     _scaleChanged : function() {
-        if ( !this._image && !this._meta )
+        if ( !this._image || !this._meta )
             return;
 
         this.resize(this._meta.width * this.scale / 100, this._meta.height * this.scale / 100);
