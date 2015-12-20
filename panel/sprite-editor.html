@@ -4,7 +4,7 @@
     <template>
         <editor-toolbar>
             <span class="flex-1 layout horizontal">
-                <editor-slider id="scaleSlider" input disabled="{{!hasContent}}" type="int" class="flex-1" value="{{scale}}" max="500" min="20"></editor-slider>
+                <editor-slider id="scaleSlider" disabled="{{!hasContent}}" type="int" class="flex-1" value="{{scale}}" max="{{maxScale}}" min="{{minScale}}"></editor-slider>
             </span>
             <span class="layout horizontal">
                 <editor-button disabled="{{!dirty}}" class="red" on-click="_onRevert">
