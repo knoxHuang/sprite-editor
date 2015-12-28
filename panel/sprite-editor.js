@@ -93,7 +93,7 @@ Editor.registerPanel( 'sprite-editor.panel', {
             return;
         }
         var newScale;
-        if (bcr.width < bcr.height) {
+        if (this._meta.width > this._meta.height) {
             newScale = (bcr.width / this._meta.width) * 100;
         }
         else {
